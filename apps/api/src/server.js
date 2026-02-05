@@ -22,6 +22,7 @@ app.use(express.json());
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/posts', require('./routes/posts'));
 app.use('/api/matches', require('./routes/matches'));
+app.use('/api/admin', require('./routes/admin'));
 
 // Socket.io logic
 io.on('connection', (socket) => {
@@ -29,6 +30,14 @@ io.on('connection', (socket) => {
   
   socket.on('join_match', (matchId) => {
     socket.join(`match_${matchId}`);
+  });
+
+  socket.on('join_post', (postId) => {
+    socket.join(`post_${postId}`);
+  });
+
+  socket.on('typing', ({ postId, username }) => {
+    socket.to(`post_${postId}`).emit('user_typing', { username });
   });
 
   socket.on('disconnect', () => {

@@ -7,8 +7,12 @@ const MatchTicker = () => {
 
   useEffect(() => {
     const fetchMatches = async () => {
-      const { data } = await api.get('/matches');
-      setMatches(data);
+      try {
+        const { data } = await api.get('/matches');
+        setMatches(data);
+      } catch (err) {
+        console.error('Failed to fetch matches');
+      }
     };
     fetchMatches();
 
@@ -24,15 +28,20 @@ const MatchTicker = () => {
 
   return (
     <div className="bg-charcoal-900 border-b border-charcoal-700 h-10 overflow-hidden flex items-center">
-      <div className="bg-red-600 text-white text-[10px] font-bold px-2 h-full flex items-center shrink-0">LIVE</div>
-      <div className="flex gap-4 px-4 overflow-x-auto no-scrollbar items-center">
+      <div className="bg-red-600 text-white text-[10px] font-bold px-2 h-full flex items-center shrink-0 tracking-tighter uppercase">Funding & Events</div>
+      <div className="flex gap-0 overflow-x-auto no-scrollbar items-center h-full">
         {liveMatches.length > 0 ? liveMatches.map(match => (
-          <div key={match.id} className="flex items-center gap-2 whitespace-nowrap text-xs border-r border-charcoal-700 pr-4">
-            <span className="text-gray-400">{match.title}</span>
-            <span className="font-bold">{match.teamA} {match.scoreA} : {match.scoreB} {match.teamB}</span>
+          <div key={match.id} className="flex items-center h-full px-4 border-r border-charcoal-700 whitespace-nowrap group hover:bg-charcoal-800 transition-colors cursor-pointer">
+            <span className="text-[10px] text-gray-500 font-bold uppercase mr-2 group-hover:text-red-500 transition-colors">{match.title}</span>
+            <span className="text-xs font-bold text-gray-300">
+              {match.teamA} <span className="text-red-500">{match.scoreA}</span> : <span className="text-red-500">{match.scoreB}</span> {match.teamB}
+            </span>
           </div>
         )) : (
-          <span className="text-xs text-gray-500 italic">No live events at the moment</span>
+          <div className="px-4 text-[11px] text-gray-500 italic flex items-center gap-2">
+            <span className="w-2 h-2 bg-charcoal-700 rounded-full animate-pulse"></span>
+            No live events tracking.
+          </div>
         )}
       </div>
     </div>

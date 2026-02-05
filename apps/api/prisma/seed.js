@@ -1,73 +1,63 @@
 const { PrismaClient } = require('@prisma/client');
-const bcrypt = require('bcryptjs');
 const prisma = new PrismaClient();
+const bcrypt = require('bcryptjs');
 
 async function main() {
   const hashedPassword = await bcrypt.hash('password123', 10);
-  
+
+  // Create users
   const admin = await prisma.user.upsert({
     where: { email: 'admin@vlr.gg' },
     update: {},
     create: {
-      username: 'admin',
+      username: 'Slasher',
       email: 'admin@vlr.gg',
       password: hashedPassword,
-      role: 'ADMIN'
-    }
+      role: 'ADMIN',
+    },
   });
 
   const reporter = await prisma.user.upsert({
     where: { email: 'reporter@vlr.gg' },
     update: {},
     create: {
-      username: 'slasher',
+      username: 'ReporterJoe',
       email: 'reporter@vlr.gg',
       password: hashedPassword,
-      role: 'REPORTER'
-    }
+      role: 'REPORTER',
+    },
   });
 
-  await prisma.post.create({
-    data: {
-      title: 'Welcome to the Indian Founders Hub',
-      content: 'This is the place for Indian founders to discuss SaaS, Fintech, and more.',
-      authorId: admin.id,
-      flair: 'SaaS',
-      type: 'FORUM'
-    }
-  });
-
+  // Create matches
   await prisma.match.createMany({
     data: [
-      {
-        title: 'Pitch Session #1',
-        teamA: 'Startup A',
-        teamB: 'Startup B',
-        scoreA: 2,
-        scoreB: 1,
-        status: 'COMPLETED',
-        startTime: new Date(Date.now() - 3600000)
-      },
-      {
-        title: 'Auto Meetup Mumbai',
-        teamA: 'Team Electric',
-        teamB: 'Team Petrol',
-        scoreA: 0,
-        scoreB: 0,
-        status: 'LIVE',
-        startTime: new Date()
-      },
-      {
-        title: 'Founder Pitch Finals',
-        teamA: 'Finalist 1',
-        teamB: 'Finalist 2',
-        status: 'UPCOMING',
-        startTime: new Date(Date.now() + 86400000)
-      }
+      { title: 'Founders Pitch Day', teamA: 'Skyline AI', teamB: 'GreenTech', scoreA: 2, scoreB: 1, status: 'COMPLETED', startTime: new Date() },
+      { title: 'Auto Meetup 2024', teamA: 'Tesla Owners', teamB: 'Rivian Crew', scoreA: 0, scoreB: 0, status: 'LIVE', startTime: new Date() },
+      { title: 'Zomato Funding Round', teamA: 'Zomato', teamB: 'Investors', scoreA: 500, scoreB: 0, status: 'LIVE', startTime: new Date() },
+      { title: 'SaaS Wars', teamA: 'Slackers', teamB: 'Teams', scoreA: 0, scoreB: 0, status: 'UPCOMING', startTime: new Date(Date.now() + 86400000) },
     ]
   });
 
-  console.log('Seed data created');
+  // Create posts
+  await prisma.post.create({
+    data: {
+      title: 'How to scale a SaaS in 2024',
+      content: 'Scaling a SaaS is hard. Focus on retention first.',
+      type: 'FORUM',
+      flair: 'SaaS',
+      authorId: admin.id,
+      comments: {
+        create: [
+          {
+            content: 'Great advice! What about pricing models?',
+            authorId: reporter.id,
+          }
+        ]
+      }
+    }
+  });
+
+  console.log('Seed completed');
 }
 
 main()

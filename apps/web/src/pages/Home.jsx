@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import Sidebar from '../components/Sidebar';
 import PostList from '../components/PostList';
 
@@ -36,6 +37,12 @@ const Home = () => {
 
       {/* Right Column: Forum feed */}
       <div className="w-full lg:w-[400px] flex flex-col gap-6">
+        <Link 
+          to="/create-post" 
+          className="bg-red-600 text-white text-center py-2 text-xs font-bold uppercase tracking-widest hover:bg-red-700 transition-colors"
+        >
+          Start New Discussion
+        </Link>
         <PostList />
         <Sidebar />
       </div>
