@@ -1,0 +1,81 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+  engineType = "binary"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        Int       @id @default(autoincrement())
+  username  String    @unique
+  email     String    @unique
+  password  String
+  role      String    @default("USER") // USER, REPORTER, ADMIN
+  posts     Post[]
+  comments  Comment[]
+  votes     Vote[]
+  createdAt DateTime  @default(now())
+}
+
+model Post {
+  id        Int       @id @default(autoincrement())
+  title     String
+  content   String
+  authorId  Int
+  author    User      @relation(fields: [authorId], references: [id])
+  comments  Comment[]
+  votes     Vote[]
+  type      String    @default("FORUM") // FORUM, NEWS, BUILD_LOG
+  flair     String?   // SaaS, Fintech, etc.
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+model Comment {
+  id        Int       @id @default(autoincrement())
+  content   String
+  postId    Int
+  post      Post      @relation(fields: [postId], references: [id])
+  authorId  Int
+  author    User      @relation(fields: [authorId], references: [id])
+  parentId  Int?
+  parent    Comment?  @relation("CommentToComment", fields: [parentId], references: [id])
+  replies   Comment[] @relation("CommentToComment")
+  votes     Vote[]
+  createdAt DateTime  @default(now())
+}
+
+model Vote {
+  id        Int      @id @default(autoincrement())
+  value     Int      // 1 or -1
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id])
+  postId    Int?
+  post      Post?    @relation(fields: [postId], references: [id])
+  commentId Int?
+  comment   Comment? @relation(fields: [commentId], references: [id])
+  createdAt DateTime @default(now())
+
+  @@unique([userId, postId])
+  @@unique([userId, commentId])
+}
+
+model Match {
+  id           Int      @id @default(autoincrement())
+  title        String
+  teamA        String
+  teamB        String
+  scoreA       Int      @default(0)
+  scoreB       Int      @default(0)
+  status       String   @default("UPCOMING") // UPCOMING, LIVE, COMPLETED
+  startTime    DateTime
+  participants String?  // For events
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
